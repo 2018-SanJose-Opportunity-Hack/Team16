@@ -5,6 +5,9 @@ var sql = require("mssql");
 var app = express();
 var utils = require("./utility");
 var readXlsxFile = require('read-excel-file/node');
+var paypal = require('paypal-rest-sdk');
+
+
 
 
 // Body Parser Middleware
@@ -20,11 +23,18 @@ app.use(function (req, res, next) {
 });
 
 //Setting up server
-var server = app.listen(process.env.PORT || 8080, function () {
+var server = app.listen(process.env.PORT || 3002, function () {
     var port = server.address().port;
     console.log("App now running on port", port);
 });
 
+paypal.configure({
+    'mode': 'sandbox', //sandbox or live
+    'client_id': 'AZ-UJC1uyNl-Y08HsiiEg4egYTXxXaRonZzgz4cUNzhXdOmAUCybZbT35zIBfiV9xjU_Q1Wh_ddgDKf6',
+    'client_secret': 'EFvNq69fTXuipbwXwk8brvf4uiCCuJyh5p84RuPgcpr1HFddk3xJI4XGvwaYjxpoRYoN6YqW--TzWFI0'
+  });
+
+  
 //Initiallising connection string
 var dbConfig = {
 
@@ -73,6 +83,36 @@ app.get("/api/transaction", function (req, res) {
     executeQuery(res, query);
 });
 
+app.post('/api/paypalPayment', function(request, response){
+    var create_payout_json = {
+        "sender_batch_header": {
+        "sender_batch_id": Math.floor(Math.random()*90000000) + 10000,
+        "email_subject": "You won - Saverlife"
+        },
+        "items": [{
+        "recipient_type": "EMAIL",
+        "amount": {
+        "value": request.body.balance,
+        "currency": "USD"
+        },
+        "note": "You won - Saverlife",
+        "sender_item_id": "item_3}",
+        "receiver": "murtaza-sandbox@gmail.com"
+        }]
+    }
+
+    paypal.payout.create(create_payout_json, function (error, payment) {
+        console.log(error)
+        if (error) {
+            throw error;
+        } else {
+            console.log("Create Payment Response");
+            console.log(payment);
+            response.json({message: "Payment done", success: true})
+        }
+    });
+})
+
 //post API to get all user transactions
 app.post("/api/user_transactions", function (req, res) {
         var user_email = req.body.user_email;
@@ -91,6 +131,14 @@ app.post("/api/update_preference", function (req, res) {
 executeQuery(res, query);
 });
 
+app.post("/api/redeem_details", function (req, res) {
+    var user_email = req.body.user_email;
+    var query = "select x.credit - y.debit as balance from ((select COALESCE(sum(amount),0) as credit from TRANSACTION_LOG where user_email = '"+user_email+"' and transaction_type='credit') x, (select COALESCE(sum(amount),0) as debit from TRANSACTION_LOG where user_email = '"+user_email+"' and transaction_type='debit') y)";
+    console.log(query);
+    executeQuery(res, query);
+    });
+    
+
 //POST total won
 app.post("/api/get_winnings", function (req, res) {
     var user_email = req.body.user_email;
@@ -108,14 +156,6 @@ app.post("/api/get_withdraws", function (req, res) {
 executeQuery(res, query);
 });
 //post API to update the read 
-app.post("/api/update_user_saw", function (req, res) {
-    var user_email = req.body.user_email;
-    var user_token = req.body.url_token;
-    var query = "update TRANSACTION_LOG set scratched='Y'"+
-    " where transaction_type = 'credit' and url_token ='"+user_token+"' and user_email ='"+ user_email+"'";
-
-executeQuery(res, query);
-});
 
 //post redeem
 app.post("/api/redeem", function (req, res) {
@@ -158,7 +198,23 @@ app.delete("/api/user /:id", function (req, res) {
     executeQuery(res, query);
 });
 
+app.post("/api/user_transaction_token", function (req, res) {
+    var user_token = req.body.user_token;
+    var query = "select * from TRANSACTION_LOG where url_token ='"+ user_token+"'";
+    executeQuery(res, query);
+});
 
+app.post("/api/update_user_saw", function (req, res) {
+    //var user_email = req.body.user_email;
+    console.log("fjdfnskdjfn")
+    var user_token = req.body.url_token;
+    console.log(user_token);
+    var query = "update TRANSACTION_LOG set scratched='Y'"+
+    " where transaction_type = 'credit' and url_token ='"+user_token+"'";
+    
+    executeQuery(res, query);
+});
+    
 var multiparty = require('multiparty');
 let fs = require('fs');
 const uuidv1 = require('uuid/v1');
