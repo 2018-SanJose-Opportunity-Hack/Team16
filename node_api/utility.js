@@ -9,12 +9,12 @@ module.exports = {
                 pass: 'Project#3'
             }
         });
-
+        var url = "http://localhost:3000/scratch/"+data.token;
         var mailOptions = {
             from: 'saverlife@gmail.com',
             to: data.to,
             subject: data.subject,
-            html: '<p>Hello <b>'+data.name+'</b></p></br> <button href='
+            html: '<p>Hello <b>'+data.name+'</b></p></br> <a href='+url+' target="_blank" >Click to Scratch</a>'
         };
 
         transporter.sendMail(mailOptions, function (error, info) {

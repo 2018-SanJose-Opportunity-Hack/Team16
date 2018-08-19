@@ -187,7 +187,7 @@ app.post("/api/uploadFile", function (req, res) {
             else {
                 console.log("SUCCESS");
                 console.log(results);
-                if (results.length > 0) {
+                if (results.length = 0) {
                     resultObject.successMsg = '';
                     resultObject.errorMsg = 'Already done for this week.';
                     res.json(resultObject);
@@ -233,7 +233,7 @@ app.post("/api/uploadFile", function (req, res) {
                                     var url_token = JSON.stringify(uuidv1());
                                     var data = rows[element];
                                     var query = "insert into TRANSACTION_LOG (draw_number, user_email, user_id, amount,scratched,transaction_type,url_token)" +
-                                        " values (" + draw_number + "," + JSON.stringify(data[1]) + ", " + JSON.stringify(data[2]) + "," + data[3] + ",'N','credit'," + url_token + ");";
+                                        " values (" + draw_number + "," + JSON.stringify(data[1]) + ", " + JSON.stringify(data[0]) + "," + data[3] + ",'N','credit'," + url_token + ");";
 
                                     pool.getConnection(function (err, connection) {
                                         if (err) throw err; // not connected!
@@ -253,7 +253,7 @@ app.post("/api/uploadFile", function (req, res) {
                                                 var payload = {
                                                     to:data[1],
                                                     subject : "SaverLife : Scratch for Week "+draw_number,
-                                                    name:data[2],
+                                                    name:data[0],
                                                     token:url_token,
                                                 }
                                                 utils.emailService(payload);
