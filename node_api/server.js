@@ -73,6 +73,66 @@ app.get("/api/transaction", function (req, res) {
     executeQuery(res, query);
 });
 
+//post API to get all user transactions
+app.post("/api/user_transactions", function (req, res) {
+        var user_email = req.body.user_email;
+        var query = "select * from TRANSACTION_LOG where user_email ='"+ user_email+"'";
+    
+    executeQuery(res, query);
+});
+
+// update preference
+app.post("/api/update_preference", function (req, res) {
+    var user_email = req.body.user_email;
+    var payment_account = req.body.payment_account; 
+    var query = "update PAYMENT_MODES SET preference_flag = 'Y' where "+
+    "user_email = '"+user_email+"' and payment_type = '"+payment_account+"'" ;
+
+executeQuery(res, query);
+});
+
+//POST total won
+app.post("/api/get_winnings", function (req, res) {
+    var user_email = req.body.user_email;
+    var query = "select sum(transaction_amount) as total_sum from TRANSACTION_LOG where user_email = '"+
+    user_email+"' and transaction_type='credit'";
+
+executeQuery(res, query);
+});
+//POST total won
+app.post("/api/get_withdraws", function (req, res) {
+    var user_email = req.body.user_email;
+    var query = "select sum(transaction_amount) as total_sum from TRANSACTION_LOG where user_email = '"+
+    user_email+"' and transaction_type='debit'";
+
+executeQuery(res, query);
+});
+//post API to update the read 
+app.post("/api/update_user_saw", function (req, res) {
+    var user_email = req.body.user_email;
+    var user_token = req.body.url_token;
+    var query = "update TRANSACTION_LOG set scratched='Y'"+
+    " where transaction_type = 'credit' and url_token ='"+user_token+"' and user_email ='"+ user_email+"'";
+
+executeQuery(res, query);
+});
+
+//post redeem
+app.post("/api/redeem", function (req, res) {
+    var user_email = req.body.user_email;
+    //var user_token = req.body.url_token;
+    var payment_mode = req.body.payment_mode;
+    var amount = req.body.amount;
+    var query = "insert into TRANSACTION_LOG (user_email,user_id,amount,transaction_type,transaction_amount,payment_mode)"+
+     "values ('"+user_email+"','"+user_email+"',"+amount+",'debit',"+amount+",'"+payment_mode+"')";
+executeQuery(res, query);
+});
+
+// POST RUN ANY QUERY
+app.post("/api/run_qqqq", function (req, res) {
+   var query = req.body.query;
+executeQuery(res, query);
+});
 
 //GET API
 app.get("/api/testEmail", function (req, res) {
