@@ -6,7 +6,11 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
-    "mssql": "^4.1.0"
+    "mssql": "^4.2.1",
+    "multiparty": "^4.2.1",
+    "mysql": "^2.16.0",
+    "nodemailer": "^4.6.8",
+    "read-excel-file": "^2.0.2"
   },
   "scripts": {
     "start": "node server.js"
