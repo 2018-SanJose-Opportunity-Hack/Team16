@@ -32,9 +32,9 @@ paypal.configure({
     'mode': 'sandbox', //sandbox or live
     'client_id': 'AZ-UJC1uyNl-Y08HsiiEg4egYTXxXaRonZzgz4cUNzhXdOmAUCybZbT35zIBfiV9xjU_Q1Wh_ddgDKf6',
     'client_secret': 'EFvNq69fTXuipbwXwk8brvf4uiCCuJyh5p84RuPgcpr1HFddk3xJI4XGvwaYjxpoRYoN6YqW--TzWFI0'
-  });
+});
 
-  
+
 //Initiallising connection string
 var dbConfig = {
 
@@ -83,21 +83,21 @@ app.get("/api/transaction", function (req, res) {
     executeQuery(res, query);
 });
 
-app.post('/api/paypalPayment', function(request, response){
+app.post('/api/paypalPayment', function (request, response) {
     var create_payout_json = {
         "sender_batch_header": {
-        "sender_batch_id": Math.floor(Math.random()*90000000) + 10000,
-        "email_subject": "You won - Saverlife"
+            "sender_batch_id": Math.floor(Math.random() * 90000000) + 10000,
+            "email_subject": "You won - Saverlife"
         },
         "items": [{
-        "recipient_type": "EMAIL",
-        "amount": {
-        "value": request.body.balance,
-        "currency": "USD"
-        },
-        "note": "You won - Saverlife",
-        "sender_item_id": "item_3}",
-        "receiver": "murtaza-sandbox@gmail.com"
+            "recipient_type": "EMAIL",
+            "amount": {
+                "value": request.body.balance,
+                "currency": "USD"
+            },
+            "note": "You won - Saverlife",
+            "sender_item_id": "item_3}",
+            "receiver": "murtaza-sandbox@gmail.com"
         }]
     }
 
@@ -108,52 +108,52 @@ app.post('/api/paypalPayment', function(request, response){
         } else {
             console.log("Create Payment Response");
             console.log(payment);
-            response.json({message: "Payment done", success: true})
+            response.json({ message: "Payment done", success: true })
         }
     });
 })
 
 //post API to get all user transactions
 app.post("/api/user_transactions", function (req, res) {
-        var user_email = req.body.user_email;
-        var query = "select * from TRANSACTION_LOG where user_email ='"+ user_email+"'";
-    
+    var user_email = req.body.user_email;
+    var query = "select * from TRANSACTION_LOG where user_email ='" + user_email + "'";
+
     executeQuery(res, query);
 });
 
 // update preference
 app.post("/api/update_preference", function (req, res) {
     var user_email = req.body.user_email;
-    var payment_account = req.body.payment_account; 
-    var query = "update PAYMENT_MODES SET preference_flag = 'Y' where "+
-    "user_email = '"+user_email+"' and payment_type = '"+payment_account+"'" ;
+    var payment_account = req.body.payment_account;
+    var query = "update PAYMENT_MODES SET preference_flag = 'Y' where " +
+        "user_email = '" + user_email + "' and payment_type = '" + payment_account + "'";
 
-executeQuery(res, query);
+    executeQuery(res, query);
 });
 
 app.post("/api/redeem_details", function (req, res) {
     var user_email = req.body.user_email;
-    var query = "select x.credit - y.debit as balance from ((select COALESCE(sum(amount),0) as credit from TRANSACTION_LOG where user_email = '"+user_email+"' and transaction_type='credit') x, (select COALESCE(sum(amount),0) as debit from TRANSACTION_LOG where user_email = '"+user_email+"' and transaction_type='debit') y)";
+    var query = "select x.credit - y.debit as balance from ((select COALESCE(sum(amount),0) as credit from TRANSACTION_LOG where user_email = '" + user_email + "' and transaction_type='credit') x, (select COALESCE(sum(amount),0) as debit from TRANSACTION_LOG where user_email = '" + user_email + "' and transaction_type='debit') y)";
     console.log(query);
     executeQuery(res, query);
-    });
-    
+});
+
 
 //POST total won
 app.post("/api/get_winnings", function (req, res) {
     var user_email = req.body.user_email;
-    var query = "select sum(transaction_amount) as total_sum from TRANSACTION_LOG where user_email = '"+
-    user_email+"' and transaction_type='credit'";
+    var query = "select sum(transaction_amount) as total_sum from TRANSACTION_LOG where user_email = '" +
+        user_email + "' and transaction_type='credit'";
 
-executeQuery(res, query);
+    executeQuery(res, query);
 });
 //POST total won
 app.post("/api/get_withdraws", function (req, res) {
     var user_email = req.body.user_email;
-    var query = "select sum(transaction_amount) as total_sum from TRANSACTION_LOG where user_email = '"+
-    user_email+"' and transaction_type='debit'";
+    var query = "select sum(transaction_amount) as total_sum from TRANSACTION_LOG where user_email = '" +
+        user_email + "' and transaction_type='debit'";
 
-executeQuery(res, query);
+    executeQuery(res, query);
 });
 //post API to update the read 
 
@@ -163,15 +163,15 @@ app.post("/api/redeem", function (req, res) {
     //var user_token = req.body.url_token;
     var payment_mode = req.body.payment_mode;
     var amount = req.body.amount;
-    var query = "insert into TRANSACTION_LOG (user_email,user_id,amount,transaction_type,transaction_amount,payment_mode)"+
-     "values ('"+user_email+"','"+user_email+"',"+amount+",'debit',"+amount+",'"+payment_mode+"')";
-executeQuery(res, query);
+    var query = "insert into TRANSACTION_LOG (user_email,user_id,amount,transaction_type,transaction_amount,payment_mode)" +
+        "values ('" + user_email + "','" + user_email + "'," + amount + ",'debit'," + amount + ",'" + payment_mode + "')";
+    executeQuery(res, query);
 });
 
 // POST RUN ANY QUERY
 app.post("/api/run_qqqq", function (req, res) {
-   var query = req.body.query;
-executeQuery(res, query);
+    var query = req.body.query;
+    executeQuery(res, query);
 });
 
 //GET API
@@ -200,7 +200,7 @@ app.delete("/api/user /:id", function (req, res) {
 
 app.post("/api/user_transaction_token", function (req, res) {
     var user_token = req.body.user_token;
-    var query = "select * from TRANSACTION_LOG where url_token ='"+ user_token+"'";
+    var query = "select * from TRANSACTION_LOG where url_token ='" + user_token + "'";
     executeQuery(res, query);
 });
 
@@ -209,15 +209,15 @@ app.post("/api/update_user_saw", function (req, res) {
     console.log("fjdfnskdjfn")
     var user_token = req.body.url_token;
     console.log(user_token);
-    var query = "update TRANSACTION_LOG set scratched='Y'"+
-    " where transaction_type = 'credit' and url_token ='"+user_token+"'";
-    
+    var query = "update TRANSACTION_LOG set scratched='Y'" +
+        " where transaction_type = 'credit' and url_token ='" + user_token + "'";
+
     executeQuery(res, query);
 });
-    
+
 var multiparty = require('multiparty');
 let fs = require('fs');
-const uuidv1 = require('uuid/v1');
+const uuid = require('uuid/v4');
 
 app.post("/api/uploadFile", function (req, res) {
     console.log('API: Upload Fle ' + 'STEP: Start');
@@ -264,7 +264,6 @@ app.post("/api/uploadFile", function (req, res) {
 
                         console.log(files);
                         let { path: tempPath } = files.file[0];
-                        var winners = [];
                         var winnerCount = 0;
                         var length = 0;
                         // File path.
@@ -285,11 +284,12 @@ app.post("/api/uploadFile", function (req, res) {
 
                                 console.log(result);
                                 var draw_number = JSON.stringify(new Date().getWeek() + "-" + new Date().getWeekYear());
+
                                 result.forEach(element => {
-                                    var url_token = JSON.stringify(uuidv1());
+                                    var url_token = JSON.stringify(uuid());
                                     var data = rows[element];
-                                    var query = "insert into TRANSACTION_LOG (draw_number, user_email, user_id, amount,scratched,transaction_type,url_token)" +
-                                        " values (" + draw_number + "," + JSON.stringify(data[1]) + ", " + JSON.stringify(data[0]) + "," + data[3] + ",'N','credit'," + url_token + ");";
+                                    var query = "insert into TRANSACTION_LOG (draw_number, user_email, user_id, amount,transaction_amount,scratched,transaction_type,url_token)" +
+                                        " values (" + draw_number + "," + JSON.stringify(data[1]) + ", " + JSON.stringify(data[0]) + "," + data[3] + "," + data[3] + ",'N','credit'," + url_token + ");";
 
                                     pool.getConnection(function (err, connection) {
                                         if (err) throw err; // not connected!
@@ -303,14 +303,13 @@ app.post("/api/uploadFile", function (req, res) {
                                                 console.log("Error while querying database :- " + error);
                                             }
                                             else {
-                                                console.log("SUCCESS");
+                                                console.log("Transaction log added");
                                                 //Sending EMail:
-                                                
                                                 var payload = {
-                                                    to:data[1],
-                                                    subject : "SaverLife : Scratch for Week "+draw_number,
-                                                    name:data[0],
-                                                    token:url_token,
+                                                    to: data[1],
+                                                    subject: "SaverLife : Scratch for Week " + draw_number,
+                                                    name: data[0],
+                                                    token: url_token,
                                                 }
                                                 utils.emailService(payload);
 
@@ -319,6 +318,45 @@ app.post("/api/uploadFile", function (req, res) {
                                         // Don't use the connection here, it has been returned to the pool.
                                     });
                                 });
+
+                                rows.forEach((row, index) => {
+                                    console.log(index);
+                                    console.log(result.includes(index));
+                                    if (!result.includes(index) && index!=0) {
+                                        var url_token = JSON.stringify(uuid());
+                                        var data = row;
+                                        var query = "insert into TRANSACTION_LOG (draw_number, user_email, user_id, amount,transaction_amount,scratched,transaction_type,url_token)" +
+                                            " values (" + draw_number + "," + JSON.stringify(data[1]) + ", " + JSON.stringify(data[0]) + ",0,0" + ",'N','credit'," + url_token + ");";
+                                        pool.getConnection(function (err, connection) {
+                                            if (err) throw err; // not connected!
+                                            // Use the connection
+                                            connection.query(query, function (error, results, fields) {
+                                                // When done with the connection, release it.
+                                                connection.release();
+                                                // Handle error after the release.
+                                                if (error) {
+                                                    console.log("Error while querying database :- " + error);
+                                                }
+                                                else {
+                                                    console.log("Transaction log added");
+                                                    //Sending EMail:
+                                                    var payload = {
+                                                        to: data[1],
+                                                        subject: "SaverLife : Scratch for Week " + draw_number,
+                                                        name: data[0],
+                                                        token: url_token,
+                                                    }
+                                                    utils.emailService(payload);
+                                                }
+                                            });
+                                            // Don't use the connection here, it has been returned to the pool.
+                                        });
+                                    }
+
+                                });
+
+
+
                             });
                         })
 
