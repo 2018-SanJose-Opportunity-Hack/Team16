@@ -127,6 +127,15 @@ app.post("/api/uploadFile", function (req, res) {
             // `rows` is an array of rows
             // each row being an array of cells.
             console.log(rows);
+            var winnerCount = 0;
+            var length = rows.length;
+            if(parseInt(length)>100){
+                winnerCount = 70;
+            }else{
+                winnerCount=  parseInt(length * 0.7);
+            }
+            var winners = utils.randomArray(length,winnerCount)
+
 
         })
 
@@ -135,6 +144,7 @@ app.post("/api/uploadFile", function (req, res) {
         // });
         resultObject.successMsg = 'File Uploaded Successfully';
         resultObject.errorMsg = '';
+        resultObject.data ={"winners":winners,"winnerCount":winnerCount,"length":length} 
         res.json(resultObject);
         return;
     })
