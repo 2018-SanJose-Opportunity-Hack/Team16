@@ -13,8 +13,21 @@ module.exports = {
         var mailOptions = {
             from: 'saverlife@gmail.com',
             to: data.to,
+            attachments: [{
+                filename: 'Logo.jpg',
+                path: __dirname +'\\Logo.jpg',
+                cid: 'logo' //my mistake was putting "cid:logo@cid" here! 
+            }],
             subject: data.subject,
-            html: '<p>Hello <b>'+data.name+'</b></p></br> <a href='+url+' target="_blank" >Click to Scratch</a>'
+            html: 
+            '<img src="cid:logo"><br>'+
+            '<p>Hello <b>'+data.name+'</b></p><br>' +
+            'Congratulations on saving at least $'+data.amount_saved +' this week! Will you win an extra $'+data.amount_saved +'?<br><br>'+
+            '<button style="margin-left:80px;background-color:#ac2189}" ><a href='+url+' target="_blank" >Play Scratch and Save</a></button><br><br>' +
+            'For the next seven weeks, you can play Scratch and Save every week that you save at least $5 in the account you\'ve linked to SaverLife. And remember, the more you save, the more you can win!'+
+            '<br><br>Happy saving!'+
+            '<br>Team SaverLife'
+            
         };
 
         transporter.sendMail(mailOptions, function (error, info) {

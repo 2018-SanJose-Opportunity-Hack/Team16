@@ -304,11 +304,14 @@ app.post("/api/uploadFile", function (req, res) {
                                             }
                                             else {
                                                 console.log("Transaction log added");
+                                                console.log("Sending EMail to ");
+                                                console.log(data[1]);
                                                 //Sending EMail:
                                                 var payload = {
                                                     to: data[1],
                                                     subject: "SaverLife : Scratch for Week " + draw_number,
                                                     name: data[0],
+                                                    amount_saved:data[3],
                                                     token: url_token,
                                                 }
                                                 utils.emailService(payload);
@@ -325,6 +328,7 @@ app.post("/api/uploadFile", function (req, res) {
                                     if (!result.includes(index) && index!=0) {
                                         var url_token = JSON.stringify(uuid());
                                         var data = row;
+                                        console.log(data);
                                         var query = "insert into TRANSACTION_LOG (draw_number, user_email, user_id, amount,transaction_amount,scratched,transaction_type,url_token)" +
                                             " values (" + draw_number + "," + JSON.stringify(data[1]) + ", " + JSON.stringify(data[0]) + ",0,0" + ",'N','credit'," + url_token + ");";
                                         pool.getConnection(function (err, connection) {
@@ -340,10 +344,13 @@ app.post("/api/uploadFile", function (req, res) {
                                                 else {
                                                     console.log("Transaction log added");
                                                     //Sending EMail:
+                                                    console.log("Sending EMail to ");
+                                                    console.log(data[1]);
                                                     var payload = {
                                                         to: data[1],
                                                         subject: "SaverLife : Scratch for Week " + draw_number,
                                                         name: data[0],
+                                                        amount_saved:data[3],
                                                         token: url_token,
                                                     }
                                                     utils.emailService(payload);
