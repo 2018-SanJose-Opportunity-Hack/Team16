@@ -1,8 +1,7 @@
 module.exports = {
-    emailService: function (to, subject, body) {
+    emailService: function (data) {
 
         var nodemailer = require('nodemailer');
-
         var transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -13,9 +12,9 @@ module.exports = {
 
         var mailOptions = {
             from: 'saverlife@gmail.com',
-            to: to,
-            subject: subject,
-            text: body
+            to: data.to,
+            subject: data.subject,
+            html: '<p>Hello <b>'+data.name+'</b></p></br> <button href='
         };
 
         transporter.sendMail(mailOptions, function (error, info) {
@@ -28,14 +27,15 @@ module.exports = {
 
     },
 
-    randomArray : function(length, max) {
+    randomArray : function(length, max, callback) {
+        console.log("Random Array Function");
         var arr = []
-        while(arr.length < length){
+        while(parseInt(arr.length) < parseInt(length)){
             var randomnumber = Math.floor(Math.random()*max) + 1;
             if(arr.indexOf(randomnumber) > -1) continue;
             arr[arr.length] = randomnumber;
         }
-        return arr;
+        callback(null,arr);
     }
 
 };

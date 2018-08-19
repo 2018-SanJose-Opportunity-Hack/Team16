@@ -5,12 +5,15 @@
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.15.2",
+    "email-templates": "^2.6.0",
     "express": "^4.14.0",
+    "express-mailer": "^0.3.1",
     "mssql": "^4.2.1",
     "multiparty": "^4.2.1",
     "mysql": "^2.16.0",
     "nodemailer": "^4.6.8",
-    "read-excel-file": "^2.0.2"
+    "read-excel-file": "^2.0.2",
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "start": "node server.js"

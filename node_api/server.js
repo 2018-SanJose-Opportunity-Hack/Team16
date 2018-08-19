@@ -158,54 +158,140 @@ app.delete("/api/user /:id", function (req, res) {
     executeQuery(res, query);
 });
 
+
 var multiparty = require('multiparty');
 let fs = require('fs');
+const uuidv1 = require('uuid/v1');
 
 app.post("/api/uploadFile", function (req, res) {
     console.log('API: Upload Fle ' + 'STEP: Start');
-
     var resultObject = {
         successMsg: '',
         errorMsg: 'Error Uploading Image',
         data: {}
     }
 
-    let form = new multiparty.Form();
-    form.parse(req, (err, fields, files) => {
-        resultObject = {
-            successMsg: '',
-            errorMsg: 'Error Uploading Image',
-            data: {}
-        }
-        if(err) console.log(files);
-        
-        console.log(files);
-        let { path: tempPath } = files.file[0];
 
-        // File path.
-        readXlsxFile(tempPath).then((rows) => {
-            // `rows` is an array of rows
-            // each row being an array of cells.
-            console.log(rows);
-            var winnerCount = 0;
-            var length = rows.length;
-            if(parseInt(length)>100){
-                winnerCount = 70;
-            }else{
-                winnerCount=  parseInt(length * 0.7);
+    //Check If alread done for current week
+    pool.getConnection(function (err, connection) {
+        if (err) throw err; // not connected!
+        // Use the connection
+        connection.query("select * from TRANSACTION_LOG where draw_number=" + JSON.stringify(new Date().getWeek() + "-" + new Date().getWeekYear()), function (error, results, fields) {
+            // When done with the connection, release it.
+            connection.release();
+            // Handle error after the release.
+            if (error) {
+                console.log("Error while querying database :- " + error);
+                res.send(error);
             }
-            var winners = utils.randomArray(length,winnerCount)
+            else {
+                console.log("SUCCESS");
+                console.log(results);
+                if (results.length > 0) {
+                    resultObject.successMsg = '';
+                    resultObject.errorMsg = 'Already done for this week.';
+                    res.json(resultObject);
+                } else {
+                    let form = new multiparty.Form();
+                    form.parse(req, (err, fields, files) => {
+                        resultObject = {
+                            successMsg: '',
+                            errorMsg: 'Error Uploading File',
+                            data: {}
+                        }
+                        if (err) console.log(err);
+
+                        //If no error send file upload success
+                        resultObject.successMsg = 'File Uploaded Successfully';
+                        resultObject.errorMsg = '';
+                        res.json(resultObject);
+
+                        console.log(files);
+                        let { path: tempPath } = files.file[0];
+                        var winners = [];
+                        var winnerCount = 0;
+                        var length = 0;
+                        // File path.
+                        readXlsxFile(tempPath).then((rows) => {
+                            // `rows` is an array of rows
+                            // each row being an array of cells.
+                            console.log(rows);
+                            length = parseInt(rows.length) - 1;
+                            if (parseInt(length) > 100) {
+                                winnerCount = 70;
+                            } else {
+                                winnerCount = parseInt(length * 0.7);
+                            }
+                            console.log("Winner Count=" + winnerCount);
+                            console.log("Length=" + length);
+                            utils.randomArray(winnerCount, length, function (err, result) {
+                                console.log("result");
+
+                                console.log(result);
+                                var draw_number = JSON.stringify(new Date().getWeek() + "-" + new Date().getWeekYear());
+                                result.forEach(element => {
+                                    var url_token = JSON.stringify(uuidv1());
+                                    var data = rows[element];
+                                    var query = "insert into TRANSACTION_LOG (draw_number, user_email, user_id, amount,scratched,transaction_type,url_token)" +
+                                        " values (" + draw_number + "," + JSON.stringify(data[1]) + ", " + JSON.stringify(data[2]) + "," + data[3] + ",'N','credit'," + url_token + ");";
+
+                                    pool.getConnection(function (err, connection) {
+                                        if (err) throw err; // not connected!
+
+                                        // Use the connection
+                                        connection.query(query, function (error, results, fields) {
+                                            // When done with the connection, release it.
+                                            connection.release();
+                                            // Handle error after the release.
+                                            if (error) {
+                                                console.log("Error while querying database :- " + error);
+                                            }
+                                            else {
+                                                console.log("SUCCESS");
+                                                //Sending EMail:
+                                                
+                                                var payload = {
+                                                    to:data[1],
+                                                    subject : "SaverLife : Scratch for Week "+draw_number,
+                                                    name:data[2],
+                                                    token:url_token,
+                                                }
+                                                utils.emailService(payload);
+
+                                            }
+                                        });
+                                        // Don't use the connection here, it has been returned to the pool.
+                                    });
+                                });
+                            });
+                        })
+
+                    })
+                }
+            }
+        });
+        // Don't use the connection here, it has been returned to the pool.
+    });
 
 
-        })
-
-
-        // fs.readFile(tempPath, (err, data) => {
-        // });
-        resultObject.successMsg = 'File Uploaded Successfully';
-        resultObject.errorMsg = '';
-        resultObject.data ={"winners":winners,"winnerCount":winnerCount,"length":length} 
-        res.json(resultObject);
-        return;
-    })
 });
+
+
+Date.prototype.getWeek = function () {
+    var date = new Date(this.getTime());
+    date.setHours(0, 0, 0, 0);
+    // Thursday in current week decides the year.
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    // January 4 is always in week 1.
+    var week1 = new Date(date.getFullYear(), 0, 4);
+    // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
+        - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
+// Returns the four-digit year corresponding to the ISO week of the date.
+Date.prototype.getWeekYear = function () {
+    var date = new Date(this.getTime());
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    return date.getFullYear();
+}
